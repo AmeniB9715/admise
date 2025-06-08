@@ -7,7 +7,7 @@
     fortimail_username: "admin"
     fortimail_password: "password"
     login_url: "https://{{ fortimail_host }}/api/v1/AdminLogin/"
-    interface_url: "https://{{ fortimail_host }}/api/v1/NetworkInterface/"
+    interface_url: "https://{{ fortimail_host }}/api/v1/SysInterface/"
 
   tasks:
     - name: Authentification à FortiMail via API REST
