@@ -1,0 +1,25 @@
+---
+- name: Get firewall policies from FortiGate
+  hosts: localhost
+  gather_facts: no
+
+  vars:
+    fortigate_host: "http://192.168.171.27"
+    api_token: "NHx4nz3r90wkb9q8H8s7k9n1cGGczG"
+    vdom: "root"
+
+  tasks:
+    - name: Retrieve firewall policies
+      uri:
+        url: "{{ fortigate_host }}/api/v2/cmdb/firewall/policy?vdom={{ vdom }}"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ api_token }}"
+          Content-Type: "application/json"
+        validate_certs: no
+        return_content: yes
+      register: result
+
+    - name: Display firewall policies
+      debug:
+        var: result.json

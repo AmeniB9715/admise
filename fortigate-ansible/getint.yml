@@ -1,0 +1,33 @@
+---
+- name: Get IP address of a FortiGate interface
+  hosts: localhost
+  gather_facts: no
+
+  vars:
+    fortigate_host: "http://192.168.171.27"
+    api_token: "NHx4nz3r90wkb9q8H8s7k9n1cGGczG"
+    vdom: "root"
+    interface_name: "port1"
+
+  tasks:
+    - name: Get interface configuration
+      uri:
+        url: "{{ fortigate_host }}/api/v2/cmdb/system/interface/{{ interface_name }}?vdom={{ vdom }}"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ api_token }}"
+          Content-Type: "application/json"
+        validate_certs: no
+        return_content: yes
+      register: result
+
+    - name: Debug full JSON response
+      debug:
+        var: result.json
+
+    - name: Show IP address of the interface
+      debug:
+        msg: >
+          Interface {{ interface_name }} has IP address:
+          {{ (result.json.results[0].ip if result.json.results is iterable else result.json.results.ip) | default('unknown') }}
+

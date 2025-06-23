@@ -1,0 +1,24 @@
+---
+- name: Authenticate to FortiGate API and show cookies (with token)
+  hosts: localhost
+  gather_facts: no
+
+  vars:
+    fortigate_host: "http://192.168.171.27"
+    api_token: "NHx4nz3r90wkb9q8H8s7k9n1cGGczG"
+
+  tasks:
+    - name: Send authenticated request and capture cookies
+      uri:
+        url: "{{ fortigate_host }}/api/v2/cmdb/system/status"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ api_token }}"
+          Content-Type: "application/json"
+        validate_certs: no
+        return_content: no
+      register: result
+
+    - name: Display cookies returned by FortiGate API
+      debug:
+        var: result.cookies

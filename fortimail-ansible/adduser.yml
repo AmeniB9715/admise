@@ -1,0 +1,56 @@
+- name: Add mailbox user in FortiMail (Server Mode)
+  hosts: fortimail
+  gather_facts: no
+  connection: local   # Exécuter localement, pas de SSH
+  vars:
+    domain: "domain1.local"
+    username: "john"
+    user_password: "StrongP@ssw0rd!"
+  tasks:
+    - name: Set FortiMail credentials and IP from inventory
+      set_fact:
+        fortimail_ip: "{{ ansible_host }}"
+        fortimail_username: "{{ ansible_user }}"
+        fortimail_password: "{{ ansible_password }}"
+
+    - name: Login to FortiMail and get session cookie
+      uri:
+        url: "https://{{ fortimail_ip }}/api/v1/AdminLogin"
+        method: POST
+        headers:
+          Content-Type: application/json
+        body:
+          name: "{{ fortimail_username }}"
+          password: "{{ fortimail_password }}"
+        body_format: json
+        validate_certs: no
+        return_content: yes
+        status_code: 200
+      register: login_response
+
+    - name: Extract session cookie
+      set_fact:
+        cookie: "{{ login_response.cookies_string }}"
+
+    - name: Add a mailbox user to FortiMail (Server Mode)
+      uri:
+        url: "https://{{ fortimail_ip }}/api/v1/domain/{{ domain }}/UserMail/{{ username }}"
+        method: POST
+        headers:
+          Cookie: "{{ cookie }}"
+          Content-Type: application/json
+        body_format: json
+        body:
+          mkey: "{{ username }}"
+          password: "{{ user_password }}"
+          type: 1
+          displayname: "{{ username }}"
+          quota: 1024000
+          status: true
+        validate_certs: no
+        status_code: 200
+      register: add_user_response
+
+    - name: Show result of user creation
+      debug:
+        var: add_user_response.json

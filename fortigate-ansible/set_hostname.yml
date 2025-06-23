@@ -1,0 +1,29 @@
+---
+- name: Change FortiGate hostname to FGTsitA
+  hosts: localhost
+  gather_facts: no
+
+  vars:
+    fortigate_host: "http://192.168.171.27"
+    api_token: "NHx4nz3r90wkb9q8H8s7k9n1cGGczG"
+    vdom: "root"
+    new_hostname: "FGTsitA"
+
+  tasks:
+    - name: Change hostname
+      uri:
+        url: "{{ fortigate_host }}/api/v2/cmdb/system/global"
+        method: PUT
+        headers:
+          Authorization: "Bearer {{ api_token }}"
+          Content-Type: "application/json"
+        validate_certs: no
+        body_format: json
+        body:
+          hostname: "{{ new_hostname }}"
+        return_content: yes
+      register: result
+
+    - name: Show result
+      debug:
+        var: result.json
